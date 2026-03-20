@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="GastoSmart.Api/GastoSmart.Api.csproj" />
+  <Project Path="GastoSmart.Domain/GastoSmart.Domain.csproj" />
+  <Project Path="GastoSmart.Infrastructure/GastoSmart.Infrastructure.csproj" />
+</Solution>
