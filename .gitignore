@@ -1,6 +1,3 @@
-# Environments
-.env
-
 # .NET / C# standard ignore
 bin/
 obj/
@@ -12,3 +9,5 @@ appsettings.Production.json
 *.db
 *.db-shm
 *.db-wal
+
+.vscode/

@@ -1,31 +1,39 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
 using GastoSmart.Infrastructure.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace GastoSmart.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connBuilder = new NpgsqlConnectionStringBuilder
-        {
-            Host = Environment.GetEnvironmentVariable("DB_HOST"),
-            Database = Environment.GetEnvironmentVariable("DB_NAME"),
-            Username = Environment.GetEnvironmentVariable("DB_USER"),
-            Password = Environment.GetEnvironmentVariable("DB_PASSWORD")
-        };
-
-        if (int.TryParse(Environment.GetEnvironmentVariable("DB_PORT"), out int port))
-        {
-            connBuilder.Port = port;
-        }
-
         services.AddDbContext<AppDbContext>(options =>
         {
-            options.UseNpgsql(connBuilder.ConnectionString);
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
         });
+
+        var jwtSecret = configuration["Supabase:JwtSecret"] ?? throw new InvalidOperationException("JWT secret is not configured.");
+        var validAudience = configuration["Supabase:ValidAudience"] ?? "authenticated";
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+                    ValidateAudience = true,
+                    ValidAudience = validAudience,
+                    ValidateIssuer = false,
+                    ValidateLifetime = true
+
+                };
+            });
 
         return services;
     }
