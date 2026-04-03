@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using GastoSmart.Infrastructure.Data;
+using GastoSmart.Infrastructure.Repositories;
+using GastoSmart.Application;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -34,6 +36,8 @@ public static class DependencyInjection
 
                 };
             });
+
+        services.AddScoped<ITransactionRepository, TransactionRepository>();
 
         return services;
     }

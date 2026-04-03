@@ -1,7 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\GastoSmart.Domain\GastoSmart.Domain.csproj" />
+    <ProjectReference Include="..\GastoSmart.Application\GastoSmart.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
