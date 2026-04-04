@@ -56,8 +56,22 @@ public class TransactionsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<TransactionResponseDTO>> CreateTransaction(TransactionRequestDTO request)
+    public async Task<ActionResult<TransactionResponseDTO>> CreateTransaction(TransactionRequestDTO request, [FromHeader(Name = "X-Idempotency-Key")] Guid idempotencyKey)
     {
+        var existingTransaction = await _repository.GetByIdempotencyKeyAsync(idempotencyKey);
+        if (existingTransaction != null)
+        {
+            var existingDto = new TransactionResponseDTO
+            {
+                Id = existingTransaction.Id,
+                Title = existingTransaction.Title,
+                Amount = existingTransaction.Amount,
+                Date = existingTransaction.Date,
+                CategoryName = existingTransaction.Category?.Name ?? string.Empty
+            };
+            return Ok(existingDto);
+        }
+
         var transaction = new Transaction
         {
             Title = request.Title,
@@ -66,7 +80,8 @@ public class TransactionsController : ControllerBase
             ReceiptUrl = request.ReceiptUrl,
             IsAiGenerated = request.IsAiGenerated,
             CategoryId = request.CategoryId,
-            UserId = request.UserId
+            UserId = request.UserId,
+            IdempotencyKey = idempotencyKey
         };
 
         await _repository.AddAsync(transaction);

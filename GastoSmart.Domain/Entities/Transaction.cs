@@ -7,6 +7,7 @@ public class Transaction : BaseEntity
     public DateTime Date { get; set; }
     public string? ReceiptUrl { get; set; }
     public bool IsAiGenerated { get; set; }
+    public Guid? IdempotencyKey { get; set; }
 
     public Guid CategoryId { get; set; }
     public Category Category { get; set; } = null!;

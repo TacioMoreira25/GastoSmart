@@ -28,6 +28,13 @@ public class TransactionRepository : ITransactionRepository
             .FirstOrDefaultAsync(t => t.Id == id);
     }
 
+    public async Task<Transaction?> GetByIdempotencyKeyAsync(Guid key)
+    {
+        return await _context.Transactions
+            .Include(t => t.Category)
+            .FirstOrDefaultAsync(t => t.IdempotencyKey == key);
+    }
+
     public async Task AddAsync(Transaction transaction)
     {
         _context.Transactions.Add(transaction);
