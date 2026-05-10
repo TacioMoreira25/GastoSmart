@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace GastoSmart.Android;
+namespace Gastosmart.App;
 
 public static class MauiProgram
 {

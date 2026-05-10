@@ -1,4 +1,4 @@
-﻿namespace GastoSmart.Android;
+﻿namespace Gastosmart.App;
 
 public partial class AppShell : Shell
 {

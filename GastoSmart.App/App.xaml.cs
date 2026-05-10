@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace GastoSmart.Android;
+namespace Gastosmart.App;
 
 public partial class App : Application
 {

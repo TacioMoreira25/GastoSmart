@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace GastoSmart.Android;
+namespace Gastosmart.App;
 
 [Application]
 public class MainApplication : MauiApplication
