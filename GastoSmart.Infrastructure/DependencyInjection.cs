@@ -7,6 +7,8 @@ using GastoSmart.Application;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using GastoSmart.Application.Services;
+using GastoSmart.Infrastructure.Services;
 
 namespace GastoSmart.Infrastructure;
 
@@ -38,6 +40,7 @@ public static class DependencyInjection
             });
 
         services.AddScoped<ITransactionRepository, TransactionRepository>();
+        services.AddHttpClient<IReceiptAnalyzerService, GroqReceiptAnalyzerService>();
 
         return services;
     }

@@ -22,4 +22,10 @@
     <ProjectReference Include="..\GastoSmart.Application\GastoSmart.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="tessdata\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

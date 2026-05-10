@@ -3,6 +3,7 @@ using GastoSmart.Application.DTOs;
 using GastoSmart.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using GastoSmart.Application.Services;
 
 namespace GastoSmart.Api.Controllers;
 
@@ -11,10 +12,12 @@ namespace GastoSmart.Api.Controllers;
 public class TransactionsController : ControllerBase
 {
     private readonly ITransactionRepository _repository;
+    private readonly IReceiptAnalyzerService _receiptAnalyzerService;
 
-    public TransactionsController(ITransactionRepository repository)
+    public TransactionsController(ITransactionRepository repository, IReceiptAnalyzerService receiptAnalyzerService)
     {
         _repository = repository;
+        _receiptAnalyzerService = receiptAnalyzerService;
     }
 
     [HttpGet]
@@ -154,5 +157,19 @@ public class TransactionsController : ControllerBase
     private async Task<bool> TransactionExists(Guid id)
     {
         return await _repository.ExistsAsync(id);
+    }
+
+    [HttpPost("scan-receipt")]
+    public async Task<ActionResult<TransactionRequestDTO>> ScanReceipt(IFormFile receiptImage)
+    {
+        if (receiptImage == null || receiptImage.Length == 0)
+        {
+            return BadRequest("A valid receipt image is required.");
+        }
+
+        using var stream = receiptImage.OpenReadStream();
+        var transactionDto = await _receiptAnalyzerService.AnalyzeReceiptAsync(stream);
+
+        return Ok(transactionDto);
     }
 }
