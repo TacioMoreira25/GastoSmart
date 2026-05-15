@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
+using Gastosmart.App.Services;
 
 namespace Gastosmart.App;
 
@@ -18,6 +19,9 @@ public static class MauiProgram
 #if DEBUG
 		builder.Logging.AddDebug();
 #endif
+
+		builder.Services.AddSingleton<ApiService>();
+		builder.Services.AddTransient<MainPage>();
 
 		return builder.Build();
 	}

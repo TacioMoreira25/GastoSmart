@@ -11,3 +11,8 @@ appsettings.Production.json
 *.db-wal
 .idea
 .vscode/
+
+# Android Signing Keystore (sensitive - don't commit)
+.keystore/
+*.keystore
+*.jks

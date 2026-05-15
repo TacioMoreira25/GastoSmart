@@ -1,8 +1,14 @@
 {
   "profiles": {
-    "Windows Machine": {
-      "commandName": "Project",
-      "nativeDebugging": false
+    "Android Emulator": {
+      "commandName": "MauiAndroidEmulator",
+      "nativeDebugging": false,
+      "deploymentTarget": ""
+    },
+    "Android Device": {
+      "commandName": "MauiAndroidDevice",
+      "nativeDebugging": false,
+      "deploymentTarget": ""
     }
   }
 }
