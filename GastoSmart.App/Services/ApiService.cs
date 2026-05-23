@@ -1,8 +1,8 @@
 using System.Net.Http.Headers;
-using System.Text.Json;
+using System.Net.Http.Json;
 using Gastosmart.App.DTOs;
 
-namespace Gastosmart.App.Services;
+namespace GastoSmart.App.Services;
 
 public class ApiService
 {
@@ -12,32 +12,41 @@ public class ApiService
     {
         _httpClient = new HttpClient();
         
-#if ANDROID
-        _httpClient.BaseAddress = new Uri("http://10.0.2.2:5146");
-#else
-        _httpClient.BaseAddress = new Uri("http://localhost:5146");
-#endif
+        _httpClient.BaseAddress = new Uri("http://192.168.1.68:5146"); 
+        _httpClient.Timeout = TimeSpan.FromSeconds(120); 
     }
 
     public async Task<TransactionRequestDTO?> ScanReceiptAsync(FileResult photo)
     {
-        using var stream = await photo.OpenReadAsync();
-        using var content = new MultipartFormDataContent();
-        
-        var streamContent = new StreamContent(stream);
-        streamContent.Headers.ContentType = new MediaTypeHeaderValue(photo.ContentType ?? "image/jpeg");
-        
-        content.Add(streamContent, "receipt", photo.FileName);
-
-        var response = await _httpClient.PostAsync("/api/Transactions/scan-receipt", content);
-        
-        if (response.IsSuccessStatusCode)
+        try
         {
-            var json = await response.Content.ReadAsStringAsync();
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            return JsonSerializer.Deserialize<TransactionRequestDTO>(json, options);
-        }
+            // Abre a foto de forma segura
+            using var stream = await photo.OpenReadAsync();
+            using var streamContent = new StreamContent(stream);
+            
+            // Define que é uma imagem
+            streamContent.Headers.ContentType = new MediaTypeHeaderValue(photo.ContentType);
 
-        return null;
+            using var formData = new MultipartFormDataContent();
+            
+            formData.Add(streamContent, "receiptImage", photo.FileName);
+
+            // Dispara para a API
+            var response = await _httpClient.PostAsync("/api/Transactions/scan-receipt", formData);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<TransactionRequestDTO>();
+            }
+            else
+            {
+                var erroApi = await response.Content.ReadAsStringAsync();
+                throw new Exception($"A API recusou a foto. Status: {response.StatusCode}. Detalhe: {erroApi}");
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Falha ao enviar foto: {ex.Message}");
+        }
     }
 }

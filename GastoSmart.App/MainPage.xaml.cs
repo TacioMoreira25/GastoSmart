@@ -1,79 +1,72 @@
-using Gastosmart.App.Services;
+using Gastosmart.App.DTOs;
+using GastoSmart.App.Services;
 
-namespace Gastosmart.App;
+namespace GastoSmart.App;
 
 public partial class MainPage : ContentPage
 {
-	private readonly ApiService _apiService;
+    private readonly ApiService _apiService;
+    private TransactionRequestDTO _currentTransaction;
 
-	public MainPage(ApiService apiService)
-	{
-		InitializeComponent();
-		_apiService = apiService;
-	}
+    public MainPage(ApiService apiService)
+    {
+        InitializeComponent();
+        _apiService = apiService;
+    }
 
-	private async void OnTakePhotoClicked(object sender, EventArgs e)
-	{
-		try
-		{
-			if (MediaPicker.Default.IsCaptureSupported)
-			{
-				var photo = await MediaPicker.Default.CapturePhotoAsync();
-				await ProcessPhotoAsync(photo);
-			}
-		}
-		catch (Exception ex)
-		{
-			await DisplayAlert("Erro", $"Falha ao abrir a câmera: {ex.Message}", "OK");
-		}
-	}
+    private async void OnTakePhotoClicked(object sender, EventArgs e)
+    {
+        await ProcessPhotoAsync(MediaPicker.Default.CapturePhotoAsync);
+    }
 
-	private async void OnPickPhotoClicked(object sender, EventArgs e)
-	{
-		try
-		{
-			var photo = await MediaPicker.Default.PickPhotoAsync();
-			await ProcessPhotoAsync(photo);
-		}
-		catch (Exception ex)
-		{
-			await DisplayAlert("Erro", $"Falha ao selecionar foto: {ex.Message}", "OK");
-		}
-	}
+    private async void OnPickPhotoClicked(object sender, EventArgs e)
+    {
+        await ProcessPhotoAsync(MediaPicker.Default.PickPhotoAsync);
+    }
 
-	private async Task ProcessPhotoAsync(FileResult? photo)
-	{
-		if (photo == null) return;
+    private async Task ProcessPhotoAsync(Func<MediaPickerOptions, Task<FileResult>> photoFunc)
+    {
+        try
+        {
+            var photo = await photoFunc(new MediaPickerOptions { Title = "Selecione o recibo" });
+            if (photo == null) return;
 
-		LoadingIndicator.IsRunning = true;
-		LoadingIndicator.IsVisible = true;
-		TitleLabel.Text = string.Empty;
-		AmountLabel.Text = string.Empty;
-		DateLabel.Text = string.Empty;
+            // Mostra a foto que você acabou de tirar na tela
+            var stream = await photo.OpenReadAsync();
+            ReceiptImage.Source = ImageSource.FromStream(() => stream);
 
-		try
-		{
-			var result = await _apiService.ScanReceiptAsync(photo);
+            // Mostra a bolinha girando e esconde o resultado antigo
+            LoadingIndicator.IsRunning = true;
+            LoadingIndicator.IsVisible = true;
+            ResultFrame.IsVisible = false;
 
-			if (result != null)
-			{
-				TitleLabel.Text = $"Título: {result.Title}";
-				AmountLabel.Text = $"Valor: {result.Amount:C2}";
-				DateLabel.Text = $"Data: {result.Date:dd/MM/yyyy}";
-			}
-			else
-			{
-				await DisplayAlert("Erro", "Não foi possível processar o recibo.", "OK");
-			}
-		}
-		catch (Exception ex)
-		{
-			await DisplayAlert("Erro", $"Falha de comunicação com a API: {ex.Message}", "OK");
-		}
-		finally
-		{
-			LoadingIndicator.IsRunning = false;
-			LoadingIndicator.IsVisible = false;
-		}
-	}
+            // Envia para a API local
+            _currentTransaction = await _apiService.ScanReceiptAsync(photo);
+
+            if (_currentTransaction != null)
+            {
+                // Preenche a tela com os dados que vieram do Groq
+                TitleLabel.Text = _currentTransaction.Title;
+                AmountLabel.Text = _currentTransaction.Amount.ToString("C"); // Formata como moeda
+                DateLabel.Text = _currentTransaction.Date.ToString("dd/MM/yyyy");
+                
+                ResultFrame.IsVisible = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Se falhar a comunicação, vai mostrar EXATAMENTE qual foi o erro aqui
+            await DisplayAlert("Erro Técnico", ex.Message, "OK");
+        }
+        finally
+        {
+            LoadingIndicator.IsRunning = false;
+            LoadingIndicator.IsVisible = false;
+        }
+    }
+
+    private async void OnSaveTransactionClicked(object sender, EventArgs e)
+    {
+        await DisplayAlert("Próximo Passo", "Aqui faremos a chamada POST para salvar no banco de dados!", "OK");
+    }
 }

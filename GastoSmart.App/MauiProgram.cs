@@ -1,5 +1,6 @@
+using GastoSmart.App;
 using Microsoft.Extensions.Logging;
-using Gastosmart.App.Services;
+using GastoSmart.App.Services;
 
 namespace Gastosmart.App;
 

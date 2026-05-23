@@ -28,6 +28,6 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/api/health");
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.Run();

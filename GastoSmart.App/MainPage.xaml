@@ -1,31 +1,36 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Gastosmart.App.MainPage">
+             x:Class="GastoSmart.App.MainPage"
+             Title="GastoSmart AI">
 
     <ScrollView>
-        <VerticalStackLayout
-            Padding="30,0"
-            Spacing="25"
-            VerticalOptions="Center">
+        <VerticalStackLayout Padding="30" Spacing="20">
 
-            <Button
-                Text="Tirar Foto do Recibo" 
-                Clicked="OnTakePhotoClicked"
-                HorizontalOptions="Fill" />
+            <Image x:Name="ReceiptImage" HeightRequest="250" BackgroundColor="#EAEAEA" />
 
-            <Button
-                Text="Escolher da Galeria" 
-                Clicked="OnPickPhotoClicked"
-                HorizontalOptions="Fill" />
+            <Button Text="📸 Tirar Foto" Clicked="OnTakePhotoClicked" />
+            <Button Text="🖼️ Escolher da Galeria" Clicked="OnPickPhotoClicked" />
 
-            <ActivityIndicator x:Name="LoadingIndicator" IsRunning="False" IsVisible="False" />
+            <ActivityIndicator x:Name="LoadingIndicator" IsRunning="False" IsVisible="False" Color="Blue" />
 
-            <Label x:Name="TitleLabel" FontSize="18" FontAttributes="Bold" />
-            <Label x:Name="AmountLabel" FontSize="18" TextColor="Green" />
-            <Label x:Name="DateLabel" FontSize="16" />
+            <Frame x:Name="ResultFrame" IsVisible="False" Padding="20" BackgroundColor="#F8F9FA">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="✨ Resultado da IA" FontAttributes="Bold" FontSize="18" TextColor="DarkBlue"/>
+                    
+                    <Label Text="Título:" FontAttributes="Bold" />
+                    <Label x:Name="TitleLabel" />
+
+                    <Label Text="Valor:" FontAttributes="Bold" />
+                    <Label x:Name="AmountLabel" />
+
+                    <Label Text="Data:" FontAttributes="Bold" />
+                    <Label x:Name="DateLabel" />
+
+                    <Button Text="✅ Confirmar e Salvar" Clicked="OnSaveTransactionClicked" Margin="0,15,0,0" BackgroundColor="Green" TextColor="White" />
+                </VerticalStackLayout>
+            </Frame>
 
         </VerticalStackLayout>
     </ScrollView>
-
 </ContentPage>
