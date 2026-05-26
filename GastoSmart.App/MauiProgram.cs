@@ -18,7 +18,10 @@ public static class MauiProgram
 			});
 
 #if DEBUG
-		builder.Logging.AddDebug();
+		builder.Logging.AddDebug()
+			.AddFilter("Microsoft", LogLevel.Warning)
+			.AddFilter("System", LogLevel.Warning)
+			.AddFilter("Gastosmart.App", LogLevel.Debug);
 #endif
 
 		builder.Services.AddSingleton<ApiService>();

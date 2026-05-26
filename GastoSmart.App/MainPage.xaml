@@ -14,7 +14,10 @@
 
             <ActivityIndicator x:Name="LoadingIndicator" IsRunning="False" IsVisible="False" Color="Blue" />
 
-            <Frame x:Name="ResultFrame" IsVisible="False" Padding="20" BackgroundColor="#F8F9FA">
+            <Border x:Name="ResultFrame" IsVisible="False" Padding="20" BackgroundColor="#F8F9FA">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
                 <VerticalStackLayout Spacing="10">
                     <Label Text="✨ Resultado da IA" FontAttributes="Bold" FontSize="18" TextColor="DarkBlue"/>
                     
@@ -29,7 +32,7 @@
 
                     <Button Text="✅ Confirmar e Salvar" Clicked="OnSaveTransactionClicked" Margin="0,15,0,0" BackgroundColor="Green" TextColor="White" />
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
         </VerticalStackLayout>
     </ScrollView>

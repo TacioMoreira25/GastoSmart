@@ -6,7 +6,7 @@ namespace GastoSmart.App;
 public partial class MainPage : ContentPage
 {
     private readonly ApiService _apiService;
-    private TransactionRequestDTO _currentTransaction;
+    private TransactionRequestDTO? _currentTransaction;
 
     public MainPage(ApiService apiService)
     {
@@ -14,17 +14,21 @@ public partial class MainPage : ContentPage
         _apiService = apiService;
     }
 
-    private async void OnTakePhotoClicked(object sender, EventArgs e)
+    private async void OnTakePhotoClicked(object? sender, EventArgs e)
     {
-        await ProcessPhotoAsync(MediaPicker.Default.CapturePhotoAsync);
+        await ProcessPhotoAsync(options => MediaPicker.Default.CapturePhotoAsync(options));
     }
 
-    private async void OnPickPhotoClicked(object sender, EventArgs e)
+    private async void OnPickPhotoClicked(object? sender, EventArgs e)
     {
-        await ProcessPhotoAsync(MediaPicker.Default.PickPhotoAsync);
+        await ProcessPhotoAsync(async options => 
+        {
+            var results = await MediaPicker.Default.PickPhotosAsync(new MediaPickerOptions { Title = options.Title });
+            return results?.FirstOrDefault();
+        });
     }
 
-    private async Task ProcessPhotoAsync(Func<MediaPickerOptions, Task<FileResult>> photoFunc)
+    private async Task ProcessPhotoAsync(Func<MediaPickerOptions, Task<FileResult?>> photoFunc)
     {
         try
         {
@@ -56,7 +60,7 @@ public partial class MainPage : ContentPage
         catch (Exception ex)
         {
             // Se falhar a comunicação, vai mostrar EXATAMENTE qual foi o erro aqui
-            await DisplayAlert("Erro Técnico", ex.Message, "OK");
+            await DisplayAlertAsync("Erro Técnico", ex.Message, "OK");
         }
         finally
         {
@@ -65,8 +69,8 @@ public partial class MainPage : ContentPage
         }
     }
 
-    private async void OnSaveTransactionClicked(object sender, EventArgs e)
+    private async void OnSaveTransactionClicked(object? sender, EventArgs e)
     {
-        await DisplayAlert("Próximo Passo", "Aqui faremos a chamada POST para salvar no banco de dados!", "OK");
+        await DisplayAlertAsync("Próximo Passo", "Aqui faremos a chamada POST para salvar no banco de dados!", "OK");
     }
 }
