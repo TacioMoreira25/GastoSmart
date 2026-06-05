@@ -16,3 +16,5 @@ appsettings.Production.json
 .keystore/
 *.keystore
 *.jks
+
+GastoSmart.App/LocalConfig.cs

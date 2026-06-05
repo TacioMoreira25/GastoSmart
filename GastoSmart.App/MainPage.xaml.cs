@@ -24,7 +24,7 @@ public partial class MainPage : ContentPage
         await ProcessPhotoAsync(async options => 
         {
             var results = await MediaPicker.Default.PickPhotosAsync(new MediaPickerOptions { Title = options.Title });
-            return results?.FirstOrDefault();
+            return results.FirstOrDefault();
         });
     }
 
@@ -44,6 +44,9 @@ public partial class MainPage : ContentPage
             LoadingIndicator.IsVisible = true;
             ResultFrame.IsVisible = false;
 
+            // Testa conectividade com a API primeiro
+            System.Diagnostics.Debug.WriteLine("[MainPage] Testing API connectivity...");
+            
             // Envia para a API local
             _currentTransaction = await _apiService.ScanReceiptAsync(photo);
 
@@ -59,7 +62,7 @@ public partial class MainPage : ContentPage
         }
         catch (Exception ex)
         {
-            // Se falhar a comunicação, vai mostrar EXATAMENTE qual foi o erro aqui
+            System.Diagnostics.Debug.WriteLine($"[MainPage] Exception: {ex}");
             await DisplayAlertAsync("Erro Técnico", ex.Message, "OK");
         }
         finally

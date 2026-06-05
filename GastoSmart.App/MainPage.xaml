@@ -14,7 +14,7 @@
 
             <ActivityIndicator x:Name="LoadingIndicator" IsRunning="False" IsVisible="False" Color="Blue" />
 
-            <Border x:Name="ResultFrame" IsVisible="False" Padding="20" BackgroundColor="#F8F9FA">
+            <Border x:Name="ResultFrame" IsVisible="False" Padding="20" BackgroundColor="Black">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="10" />
                 </Border.StrokeShape>
