@@ -19,62 +19,11 @@ public class GroqReceiptAnalyzerService : IReceiptAnalyzerService
 
     public async Task<TransactionRequestDTO> AnalyzeReceiptAsync(Stream imageStream)
     {
-        // 1. OCR with Tesseract
         using var memoryStream = new MemoryStream();
         await imageStream.CopyToAsync(memoryStream);
-        var imageBytes = memoryStream.ToArray();
+        var base64Image = Convert.ToBase64String(memoryStream.ToArray());
+        var imageUrl = $"data:image/jpeg;base64,{base64Image}";
 
-        string extractedText = string.Empty;
-
-        var tempImageFile = Path.GetTempFileName();
-        var tempOutFileBase = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        
-        try
-        {
-            await File.WriteAllBytesAsync(tempImageFile, imageBytes);
-            
-            var processInfo = new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = "tesseract",
-                Arguments = $"\"{tempImageFile}\" \"{tempOutFileBase}\" -l por+eng",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            using var process = System.Diagnostics.Process.Start(processInfo);
-            if (process != null)
-            {
-                await process.WaitForExitAsync();
-                var outTxtFile = tempOutFileBase + ".txt";
-                if (File.Exists(outTxtFile))
-                {
-                    extractedText = await File.ReadAllTextAsync(outTxtFile);
-                }
-                else
-                {
-                    // Fallback without language flag if por+eng isn't installed
-                    processInfo.Arguments = $"\"{tempImageFile}\" \"{tempOutFileBase}\"";
-                    using var fallbackProcess = System.Diagnostics.Process.Start(processInfo);
-                    if (fallbackProcess != null)
-                    {
-                        await fallbackProcess.WaitForExitAsync();
-                        if (File.Exists(outTxtFile))
-                        {
-                            extractedText = await File.ReadAllTextAsync(outTxtFile);
-                        }
-                    }
-                }
-            }
-        }
-        finally
-        {
-            if (File.Exists(tempImageFile)) File.Delete(tempImageFile);
-            if (File.Exists(tempOutFileBase + ".txt")) File.Delete(tempOutFileBase + ".txt");
-        }
-
-        // 2. IA with Groq
         var apiKey = _configuration["Groq:ApiKey"];
         if (string.IsNullOrEmpty(apiKey))
         {
@@ -83,33 +32,36 @@ public class GroqReceiptAnalyzerService : IReceiptAnalyzerService
 
         _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
 
-        var systemPrompt = @"Você é um assistente especializado em extrair dados financeiros de recibos.
-        Vou te passar o texto extraído de um recibo por OCR (pode conter erros ou estar sujo).
-        Sua tarefa é analisar o texto e retornar EXCLUSIVAMENTE um JSON que represente a transação.
+        var systemPrompt = @"Você é um assistente financeiro especialista em extrair dados de recibos.
+        Vou enviar-lhe a imagem de um recibo. A sua tarefa é analisá-lo e retornar EXCLUSIVAMENTE um JSON.
         O JSON deve ter EXATAMENTE a seguinte estrutura:
         {
-          ""Title"": ""Nome do estabelecimento ou resumo da compra"",
+          ""Title"": ""Nome do estabelecimento ou resumo claro da compra"",
           ""Amount"": 123.45,
           ""Date"": ""2023-10-25T00:00:00Z""
         }
         Regras:
-        - Não inclua nenhuma outra chave.
-        - O Amount deve ser um número decimal (use ponto, não vírgula).
-        - A Date deve estar em formato ISO 8601.
-        - Retorne APENAS o JSON, sem markdown ou texto extra. Isso é crítico.";
-
-        var modelId = _configuration["Groq:ModelId"] ?? "llama-3.1-8b-instant";
-        if (modelId == "llama3-8b-8192") modelId = "llama-3.1-8b-instant"; 
+        - Não escreva NADA além do JSON puro. Sem saudações ou markdown.
+        - O 'Amount' DEVE ser o valor TOTAL da fatura, usando ponto para as casas decimais (ex: 15.50).
+        - A 'Date' deve ser a data da compra em formato ISO 8601. Se não for visível, use a data de hoje.";
 
         var payload = new
         {
-            model = modelId,
-            messages = new[]
+            model = "meta-llama/llama-4-scout-17b-16e-instruct",            
+            messages = new object[]
             {
                 new { role = "system", content = systemPrompt },
-                new { role = "user", content = $"Texto do recibo:\n\n{extractedText}" }
+                new 
+                { 
+                    role = "user", 
+                    content = new object[] 
+                    {
+                        new { type = "text", text = "Extraia os dados deste recibo de acordo com o esquema JSON solicitado." },
+                        new { type = "image_url", image_url = new { url = imageUrl } }
+                    }
+                }
             },
-            temperature = 0.0
+            temperature = 0.0 
         };
 
         var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -119,39 +71,31 @@ public class GroqReceiptAnalyzerService : IReceiptAnalyzerService
         
         if (!response.IsSuccessStatusCode)
         {
-            throw new Exception($"Groq API falhou com status {response.StatusCode} e corpo: {responseString}");
+            throw new Exception($"Groq API falhou. Status: {response.StatusCode}. Erro: {responseString}");
         }
 
         using var jsonDocument = JsonDocument.Parse(responseString);
-        var root = jsonDocument.RootElement;
-        
-        var messageContent = root.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
+        var messageContent = jsonDocument.RootElement
+            .GetProperty("choices")[0]
+            .GetProperty("message")
+            .GetProperty("content")
+            .GetString();
 
         if (messageContent != null)
         {
             messageContent = messageContent.Trim();
-            if (messageContent.StartsWith("```json"))
-            {
-                messageContent = messageContent.Substring(7);
-            }
-            if (messageContent.StartsWith("```"))
-            {
-                messageContent = messageContent.Substring(3);
-            }
-            if (messageContent.EndsWith("```"))
-            {
-                messageContent = messageContent.Substring(0, messageContent.Length - 3);
-            }
+            if (messageContent.StartsWith("```json")) messageContent = messageContent.Substring(7);
+            if (messageContent.StartsWith("```")) messageContent = messageContent.Substring(3);
+            if (messageContent.EndsWith("```")) messageContent = messageContent.Substring(0, messageContent.Length - 3);
             messageContent = messageContent.Trim();
+            
+            System.Diagnostics.Debug.WriteLine($"[IA RESPONSE]: {messageContent}");
         }
 
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         var transactionDto = JsonSerializer.Deserialize<TransactionRequestDTO>(messageContent ?? "{}", options);
 
-        if (transactionDto == null)
-        {
-            throw new Exception("Falha ao desserializar a resposta da Groq.");
-        }
+        if (transactionDto == null) throw new Exception("Falha ao desserializar a resposta da Groq.");
 
         transactionDto.IsAiGenerated = true;
 

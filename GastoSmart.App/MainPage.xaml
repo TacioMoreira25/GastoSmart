@@ -14,23 +14,27 @@
 
             <ActivityIndicator x:Name="LoadingIndicator" IsRunning="False" IsVisible="False" Color="Blue" />
 
-            <Border x:Name="ResultFrame" IsVisible="False" Padding="20" BackgroundColor="Black">
+            <Border x:Name="ResultFrame" IsVisible="False" Padding="20" BackgroundColor="#F8F9FA" Stroke="#CECECE" StrokeThickness="1">
                 <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="10" />
+                    <RoundRectangle CornerRadius="12" />
                 </Border.StrokeShape>
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="✨ Resultado da IA" FontAttributes="Bold" FontSize="18" TextColor="DarkBlue"/>
+    
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="✨ Resultado da IA" FontAttributes="Bold" FontSize="20" TextColor="#2B32B2" HorizontalOptions="Center"/>
+                    <BoxView HeightRequest="1" Color="#E0E0E0" Margin="0,0,0,5" />
                     
-                    <Label Text="Título:" FontAttributes="Bold" />
-                    <Label x:Name="TitleLabel" />
+                    <Label Text="Título:" FontAttributes="Bold" TextColor="#333333" />
+                    <Label x:Name="TitleLabel" FontSize="16" TextColor="#555555" Margin="0,0,0,5"/>
 
-                    <Label Text="Valor:" FontAttributes="Bold" />
-                    <Label x:Name="AmountLabel" />
+                    <Label Text="Valor:" FontAttributes="Bold" TextColor="#333333" />
+                    <Label x:Name="AmountLabel" FontSize="18" FontAttributes="Bold" TextColor="#27AE60" Margin="0,0,0,5"/>
 
-                    <Label Text="Data:" FontAttributes="Bold" />
-                    <Label x:Name="DateLabel" />
+                    <Label Text="Data:" FontAttributes="Bold" TextColor="#333333" />
+                    <Label x:Name="DateLabel" FontSize="16" TextColor="#555555" Margin="0,0,0,5"/>
 
-                    <Button Text="✅ Confirmar e Salvar" Clicked="OnSaveTransactionClicked" Margin="0,15,0,0" BackgroundColor="Green" TextColor="White" />
+                    <Label Text="ID da Categoria:" FontAttributes="Bold" TextColor="#333333" />
+                    <Label x:Name="CategoryLabel" FontSize="14" TextColor="#888888" Margin="0,0,0,5"/>
+                    <Button Text="✅ Confirmar e Salvar" Clicked="OnSaveTransactionClicked" Margin="0,20,0,0" BackgroundColor="#27AE60" TextColor="White" CornerRadius="8" FontAttributes="Bold"/>
                 </VerticalStackLayout>
             </Border>
 

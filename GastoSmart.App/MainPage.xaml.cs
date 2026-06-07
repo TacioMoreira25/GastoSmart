@@ -52,11 +52,17 @@ public partial class MainPage : ContentPage
 
             if (_currentTransaction != null)
             {
-                // Preenche a tela com os dados que vieram do Groq
-                TitleLabel.Text = _currentTransaction.Title;
-                AmountLabel.Text = _currentTransaction.Amount.ToString("C"); // Formata como moeda
+                // Preenche os campos originais
+                TitleLabel.Text = string.IsNullOrWhiteSpace(_currentTransaction.Title) ? "Nenhum título detetado" : _currentTransaction.Title;
+                AmountLabel.Text = _currentTransaction.Amount.ToString("C"); // Formata como moeda local (ex: R$ 15,00 ou 15,00 €)
                 DateLabel.Text = _currentTransaction.Date.ToString("dd/MM/yyyy");
                 
+                // Preenche os novos campos expandidos
+                CategoryLabel.Text = _currentTransaction.CategoryId != Guid.Empty 
+                    ? _currentTransaction.CategoryId.ToString() 
+                    : "Sem categoria associada";
+                
+                // Torna o quadro visível!
                 ResultFrame.IsVisible = true;
             }
         }
@@ -74,6 +80,39 @@ public partial class MainPage : ContentPage
 
     private async void OnSaveTransactionClicked(object? sender, EventArgs e)
     {
-        await DisplayAlertAsync("Próximo Passo", "Aqui faremos a chamada POST para salvar no banco de dados!", "OK");
+        if (_currentTransaction == null) return;
+
+        try
+        {
+            // Mostramos a bolinha a rodar para o utilizador saber que estamos a gravar
+            LoadingIndicator.IsRunning = true;
+            LoadingIndicator.IsVisible = true;
+            
+            // Chama a API para salvar
+            var success = await _apiService.SaveTransactionAsync(_currentTransaction);
+
+            if (success)
+            {
+                await DisplayAlertAsync("Sucesso!", "O seu gasto foi salvo no banco de dados.", "OK");
+                
+                // Limpamos o ecrã para estarmos prontos para a próxima foto!
+                ResultFrame.IsVisible = false;
+                ReceiptImage.Source = null;
+                _currentTransaction = null;
+            }
+            else
+            {
+                await DisplayAlertAsync("Ops", "Não foi possível salvar o gasto. Verifique a consola.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Erro Técnico", ex.Message, "OK");
+        }
+        finally
+        {
+            LoadingIndicator.IsRunning = false;
+            LoadingIndicator.IsVisible = false;
+        }
     }
 }

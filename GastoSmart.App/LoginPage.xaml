@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GastoSmart.App.LoginPage"
+             Title="Bem-vindo ao GastoSmart"
+             BackgroundColor="#F8F9FA">
+
+    <VerticalStackLayout Padding="30" Spacing="20" VerticalOptions="Center">
+        
+        <Label Text="GastoSmart" FontSize="32" FontAttributes="Bold" TextColor="#2B32B2" HorizontalOptions="Center" Margin="0,0,0,20"/>
+        <Label Text="Faça login para gerir os seus recibos com IA" FontSize="16" TextColor="#555555" HorizontalOptions="Center" Margin="0,0,0,20"/>
+
+        <Border BackgroundColor="White" Stroke="#CECECE" StrokeThickness="1" Padding="10,0">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            <Entry x:Name="EmailEntry" Placeholder="O seu e-mail" Keyboard="Email" TextColor="Black"/>
+        </Border>
+
+        <Border BackgroundColor="White" Stroke="#CECECE" StrokeThickness="1" Padding="10,0">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            <Entry x:Name="PasswordEntry" Placeholder="A sua senha" IsPassword="True" TextColor="Black"/>
+        </Border>
+
+        <ActivityIndicator x:Name="LoadingIndicator" IsRunning="False" IsVisible="False" Color="#27AE60" />
+
+        <Button x:Name="LoginButton" Text="Entrar" Clicked="OnLoginClicked" BackgroundColor="#27AE60" TextColor="White" CornerRadius="8" FontAttributes="Bold" HeightRequest="50" Margin="0,10,0,0"/>
+
+    </VerticalStackLayout>
+</ContentPage>

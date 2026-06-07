@@ -34,8 +34,16 @@ public static class MauiProgram
             var client = factory.CreateClient("GastoSmartClient");
             return new ApiService(client);
         });
+        
+        builder.Services.AddTransient<AuthService>(sp => 
+        {
+            var factory = sp.GetRequiredService<IHttpClientFactory>();
+            var client = factory.CreateClient();
+            return new AuthService(client);
+        });
 
         builder.Services.AddTransient<MainPage>();
+        builder.Services.AddTransient<LoginPage>();
 
         return builder.Build();
     }

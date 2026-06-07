@@ -1,23 +1,29 @@
+using System.Security.Claims;
 using GastoSmart.Application;
 using GastoSmart.Application.DTOs;
 using GastoSmart.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GastoSmart.Application.Services;
+using GastoSmart.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GastoSmart.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class TransactionsController : ControllerBase
 {
     private readonly ITransactionRepository _repository;
     private readonly IReceiptAnalyzerService _receiptAnalyzerService;
+    private readonly AppDbContext _context;
 
-    public TransactionsController(ITransactionRepository repository, IReceiptAnalyzerService receiptAnalyzerService)
+    public TransactionsController(ITransactionRepository repository, IReceiptAnalyzerService receiptAnalyzerService, AppDbContext context)
     {
         _repository = repository;
         _receiptAnalyzerService = receiptAnalyzerService;
+        _context = context;
     }
 
     [HttpGet]
@@ -59,8 +65,46 @@ public class TransactionsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<TransactionResponseDTO>> CreateTransaction(TransactionRequestDTO request, [FromHeader(Name = "X-Idempotency-Key")] Guid idempotencyKey)
+    public async Task<ActionResult<TransactionResponseDTO>> CreateTransaction(TransactionRequestDTO request,
+        [FromHeader(Name = "X-Idempotency-Key")] Guid idempotencyKey)
     {
+        var supabaseId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+        
+        if (string.IsNullOrEmpty(supabaseId))
+        {
+            return Unauthorized("Utilizador não autenticado ou token inválido.");
+        }
+
+        var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.SupabaseId == supabaseId);
+        if (dbUser == null)
+        {
+            var email = User.FindFirstValue(System.Security.Claims.ClaimTypes.Email) ?? "usuario@gastosmart.com";
+            
+            dbUser = new User 
+            { 
+                Id = Guid.NewGuid(), 
+                SupabaseId = supabaseId, 
+                Name = email.Split('@')[0],
+                Email = email 
+            };
+            _context.Users.Add(dbUser);
+            await _context.SaveChangesAsync();
+        }
+
+        request.UserId = dbUser.Id;
+
+        if (request.CategoryId == Guid.Empty)
+        {
+            var defaultCategory = await _context.Categories.FirstOrDefaultAsync(c => c.UserId == dbUser.Id);
+            if (defaultCategory == null)
+            {
+                defaultCategory = new Category { Id = Guid.NewGuid(), Name = "Outros", UserId = dbUser.Id };
+                _context.Categories.Add(defaultCategory);
+                await _context.SaveChangesAsync();
+            }
+            request.CategoryId = defaultCategory.Id;
+        }
+
         var existingTransaction = await _repository.GetByIdempotencyKeyAsync(idempotencyKey);
         if (existingTransaction != null)
         {
@@ -83,7 +127,7 @@ public class TransactionsController : ControllerBase
             ReceiptUrl = request.ReceiptUrl,
             IsAiGenerated = request.IsAiGenerated,
             CategoryId = request.CategoryId,
-            UserId = request.UserId,
+            UserId = request.UserId, 
             IdempotencyKey = idempotencyKey
         };
 
