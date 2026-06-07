@@ -21,22 +21,20 @@ public static class DependencyInjection
         {
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
         });
-
-        var jwtSecret = configuration["Supabase:JwtSecret"] ?? throw new InvalidOperationException("JWT secret is not configured.");
-        var validAudience = configuration["Supabase:ValidAudience"] ?? "authenticated";
-
+        
+        var supabaseUrl = configuration["Supabase:Url"] ?? throw new InvalidOperationException("Supabase URL is not configured.");        
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
+                options.Authority = $"{supabaseUrl}/auth/v1";
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-                    ValidateAudience = true,
-                    ValidAudience = validAudience,
-                    ValidateIssuer = false,
+                    ValidateIssuer = true,
+                    ValidIssuer = $"{supabaseUrl}/auth/v1", 
+                    
+                    ValidateAudience = false, 
                     ValidateLifetime = true
-
                 };
             });
 

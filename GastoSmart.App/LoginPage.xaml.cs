@@ -54,4 +54,9 @@ public partial class LoginPage : ContentPage
             LoginButton.IsVisible = true;
         }
     }
+
+    private void OnGoToRegisterClicked(object sender, EventArgs e)
+    {
+        Application.Current!.Windows[0].Page = new RegisterPage(_authService);
+    }
 }

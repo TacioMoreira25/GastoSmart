@@ -1,0 +1,72 @@
+using GastoSmart.App.Services;
+using System.Text.RegularExpressions;
+namespace GastoSmart.App;
+
+public partial class RegisterPage : ContentPage
+{
+    private readonly AuthService _authService;
+
+    public RegisterPage(AuthService authService)
+    {
+        InitializeComponent();
+        _authService = authService;
+    }
+
+    private async void OnRegisterClicked(object sender, EventArgs e)
+    {
+        var name = NameEntry.Text?.Trim();
+        var email = EmailEntry.Text?.Trim();
+        var password = PasswordEntry.Text;
+        var confirmPassword = ConfirmPasswordEntry.Text;
+
+        if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(confirmPassword))
+        {
+            await DisplayAlert("Atenção", "Por favor, preencha todos os campos.", "OK");
+            return;
+        }
+
+        var emailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+        if (!emailRegex.IsMatch(email))
+        {
+            await DisplayAlert("Atenção", "Por favor, insira um endereço de e-mail válido.", "OK");
+            return;
+        }
+
+        if (password.Length < 8)
+        {
+            await DisplayAlert("Atenção", "A senha deve ter no mínimo 8 caracteres.", "OK");
+            return;
+        }
+
+        if (password != confirmPassword)
+        {
+            await DisplayAlert("Erro", "As senhas não coincidem.", "OK");
+            return;
+        }
+
+        RegisterButton.IsVisible = false;
+        LoadingIndicator.IsRunning = true;
+        LoadingIndicator.IsVisible = true;
+
+        var result = await _authService.RegisterAsync(name, email, password);
+
+        LoadingIndicator.IsRunning = false;
+        LoadingIndicator.IsVisible = false;
+        RegisterButton.IsVisible = true;
+
+        if (result.IsSuccess)
+        {
+            await DisplayAlert("Sucesso", "Conta criada com sucesso! Faça login.", "OK");
+            Application.Current!.Windows[0].Page = new LoginPage(_authService);
+        }
+        else
+        {
+            await DisplayAlert("Erro", result.ErrorMessage, "OK");
+        }
+    }
+
+    private void OnBackToLoginClicked(object sender, EventArgs e)
+    {
+        Application.Current!.Windows[0].Page = new LoginPage(_authService);
+    }
+}

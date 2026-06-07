@@ -8,8 +8,8 @@
     Title="Gastosmart.app">
 
     <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate app:MainPage}"
-        Route="MainPage" />
+        Title="Dashboard"
+        ContentTemplate="{DataTemplate app:DashboardPage}"
+        Route="DashboardPage" />
 
 </Shell>

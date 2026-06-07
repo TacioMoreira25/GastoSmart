@@ -1,6 +1,7 @@
 using GastoSmart.App;
 using Microsoft.Extensions.Logging;
 using GastoSmart.App.Services;
+using Microcharts.Maui;
 
 namespace Gastosmart.App;
 
@@ -11,6 +12,7 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
 
         builder.UseMauiApp<App>()
+            .UseMicrocharts()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -44,6 +46,11 @@ public static class MauiProgram
 
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<LoginPage>();
+        builder.Services.AddTransient<RegisterPage>();
+        
+        builder.Services.AddTransient<GastoSmart.App.ViewModels.DashboardViewModel>();
+        builder.Services.AddTransient<DashboardPage>();
+        builder.Services.AddTransient<SaveTransactionPage>();
 
         return builder.Build();
     }
