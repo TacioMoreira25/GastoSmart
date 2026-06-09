@@ -1,7 +1,7 @@
 namespace GastoSmart.App;
 
 [QueryProperty(nameof(TransactionData), "TransactionData")]
-public partial class SaveTransactionPage : ContentPage
+public partial class SaveTransactionPage 
 {
     private object _transactionData;
     public object TransactionData
@@ -14,12 +14,11 @@ public partial class SaveTransactionPage : ContentPage
         }
     }
 
-    public Command GoBackCommand { get; }
-
-    public SaveTransactionPage()
+    public SaveTransactionPage(object transactionData)
     {
+        _transactionData = transactionData;
         InitializeComponent();
-        GoBackCommand = new Command(async () => await Shell.Current.GoToAsync(".."));
+        new Command(async void () => await Shell.Current.GoToAsync(".."));
         BindingContext = this;
     }
 }

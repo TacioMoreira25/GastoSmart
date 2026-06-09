@@ -3,8 +3,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Gastosmart.App.DTOs;
 using GastoSmart.App.Services;
-using Microcharts;
-using SkiaSharp;
+// using Microcharts;
+// using SkiaSharp;
 
 namespace GastoSmart.App.ViewModels;
 
@@ -13,22 +13,22 @@ public partial class DashboardViewModel : ObservableObject
     private readonly ApiService _apiService;
 
     [ObservableProperty]
-    private decimal totalBalance;
+    public partial decimal TotalBalance { get; set; }
 
     [ObservableProperty]
-    private decimal monthlyExpenses;
+    public partial decimal MonthlyExpenses { get; set; }
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
-    [ObservableProperty]
-    private Chart? expensesChart;
-
+    // [ObservableProperty]
+    // public partial Chart? ExpensesChart { get; set; }
     public ObservableCollection<TransactionResponseDTO> RecentTransactions { get; } = new();
 
-    public DashboardViewModel(ApiService apiService)
+    public DashboardViewModel(ApiService apiService, decimal monthlyExpenses)
     {
         _apiService = apiService;
+        MonthlyExpenses = monthlyExpenses;
     }
 
     [RelayCommand]
@@ -52,19 +52,21 @@ public partial class DashboardViewModel : ObservableObject
                     RecentTransactions.Add(tx);
                 }
 
-                UpdateChart(summary.CategorySummaries);
+                // UpdateChart(summary.CategorySummaries);
             }
         }
         catch (UnauthorizedAccessException)
         {
             await Shell.Current.GoToAsync("//LoginPage");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            if (Application.Current?.MainPage != null)
+            System.Diagnostics.Debug.WriteLine($"[CRASH EVITADO NO DASHBOARD]: {ex.Message}\n{ex.StackTrace}");
+        
+            MainThread.BeginInvokeOnMainThread(async void () =>
             {
-                await Application.Current.MainPage.DisplayAlert("Erro", "Não foi possível carregar o dashboard.", "OK");
-            }
+                await Application.Current?.Windows[0].Page?.DisplayAlertAsync("Erro ao Carregar", "Ocorreu um erro ao montar o painel.", "OK")!;
+            });
         }
         finally
         {
@@ -72,6 +74,7 @@ public partial class DashboardViewModel : ObservableObject
         }
     }
 
+    /*
     private void UpdateChart(List<CategorySummaryDTO> categories)
     {
         var entries = new List<ChartEntry>();
@@ -98,6 +101,7 @@ public partial class DashboardViewModel : ObservableObject
             LabelMode = LabelMode.RightOnly
         };
     }
+    */
 
     [RelayCommand]
     public async Task ScanReceiptAsync()
@@ -126,9 +130,9 @@ public partial class DashboardViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            if (Application.Current?.MainPage != null)
+            if (Application.Current?.Windows[0].Page != null)
             {
-                await Application.Current.MainPage.DisplayAlert("Erro", $"Falha ao ler recibo: {ex.Message}", "OK");
+                await Application.Current.Windows[0].Page?.DisplayAlertAsync("Erro", $"Falha ao ler recibo: {ex.Message}", "OK")!;
             }
         }
         finally

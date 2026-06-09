@@ -3,7 +3,7 @@ using GastoSmart.App.Services;
 
 namespace GastoSmart.App;
 
-public partial class LoginPage : ContentPage
+public partial class LoginPage
 {
     private readonly AuthService _authService;
 
@@ -13,14 +13,14 @@ public partial class LoginPage : ContentPage
         _authService = authService;
     }
 
-    private async void OnLoginClicked(object sender, EventArgs e)
+    private async void OnLoginClicked(object? sender, EventArgs e)
     {
-        var email = EmailEntry.Text?.Trim();
+        var email = EmailEntry.Text.Trim();
         var password = PasswordEntry.Text;
 
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
         {
-            await DisplayAlert("Atenção", "Preencha o e-mail e a senha.", "OK");
+            await DisplayAlertAsync("Atenção", "Preencha o e-mail e a senha.", "OK");
             return;
         }
 
@@ -34,16 +34,19 @@ public partial class LoginPage : ContentPage
 
             if (success)
             {
-                Application.Current!.Windows[0].Page = new AppShell();
-            }
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                 
+                    Application.Current?.Windows[0].Page = new AppShell(); 
+                });            }
             else
             {
-                await DisplayAlert("Erro", "E-mail ou senha incorretos.", "OK");
+                await DisplayAlertAsync("Erro", "E-mail ou senha incorretos.", "OK");
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Erro de Conexão", "Não foi possível conectar ao servidor de autenticação.", "OK");
+            await DisplayAlertAsync("Erro de Conexão", "Não foi possível conectar ao servidor de autenticação.", "OK");
             System.Diagnostics.Debug.WriteLine($"[Login Error]: {ex.Message}");
         }
         finally
@@ -55,7 +58,7 @@ public partial class LoginPage : ContentPage
         }
     }
 
-    private void OnGoToRegisterClicked(object sender, EventArgs e)
+    private void OnGoToRegisterClicked(object? sender, EventArgs e)
     {
         Application.Current!.Windows[0].Page = new RegisterPage(_authService);
     }

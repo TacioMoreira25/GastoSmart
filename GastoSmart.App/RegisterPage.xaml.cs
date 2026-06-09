@@ -2,7 +2,7 @@ using GastoSmart.App.Services;
 using System.Text.RegularExpressions;
 namespace GastoSmart.App;
 
-public partial class RegisterPage : ContentPage
+public partial class RegisterPage 
 {
     private readonly AuthService _authService;
 
@@ -12,35 +12,36 @@ public partial class RegisterPage : ContentPage
         _authService = authService;
     }
 
-    private async void OnRegisterClicked(object sender, EventArgs e)
+    private async void OnRegisterClicked(object? sender, EventArgs e)
     {
-        var name = NameEntry.Text?.Trim();
-        var email = EmailEntry.Text?.Trim();
+        var name = NameEntry.Text.Trim();
+        var email = EmailEntry.Text.Trim();
         var password = PasswordEntry.Text;
         var confirmPassword = ConfirmPasswordEntry.Text;
 
-        if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(confirmPassword))
+        if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || 
+            string.IsNullOrEmpty(confirmPassword))
         {
-            await DisplayAlert("Atenção", "Por favor, preencha todos os campos.", "OK");
+            await DisplayAlertAsync("Atenção", "Por favor, preencha todos os campos.", "OK");
             return;
         }
 
         var emailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
         if (!emailRegex.IsMatch(email))
         {
-            await DisplayAlert("Atenção", "Por favor, insira um endereço de e-mail válido.", "OK");
+            await DisplayAlertAsync("Atenção", "Por favor, insira um endereço de e-mail válido.", "OK");
             return;
         }
 
         if (password.Length < 8)
         {
-            await DisplayAlert("Atenção", "A senha deve ter no mínimo 8 caracteres.", "OK");
+            await DisplayAlertAsync("Atenção", "A senha deve ter no mínimo 8 caracteres.", "OK");
             return;
         }
 
         if (password != confirmPassword)
         {
-            await DisplayAlert("Erro", "As senhas não coincidem.", "OK");
+            await DisplayAlertAsync("Erro", "As senhas não coincidem.", "OK");
             return;
         }
 
@@ -56,16 +57,16 @@ public partial class RegisterPage : ContentPage
 
         if (result.IsSuccess)
         {
-            await DisplayAlert("Sucesso", "Conta criada com sucesso! Faça login.", "OK");
+            await DisplayAlertAsync("Sucesso", "Conta criada com sucesso! Faça login.", "OK");
             Application.Current!.Windows[0].Page = new LoginPage(_authService);
         }
         else
         {
-            await DisplayAlert("Erro", result.ErrorMessage, "OK");
+            await DisplayAlertAsync("Erro", result.ErrorMessage, "OK");
         }
     }
 
-    private void OnBackToLoginClicked(object sender, EventArgs e)
+    private void OnBackToLoginClicked(object? sender, EventArgs e)
     {
         Application.Current!.Windows[0].Page = new LoginPage(_authService);
     }

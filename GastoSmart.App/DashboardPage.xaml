@@ -2,7 +2,6 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:GastoSmart.App.ViewModels"
-             xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
              x:Class="GastoSmart.App.DashboardPage"
              Title="Dashboard"
              BackgroundColor="{StaticResource Gray950}">
@@ -40,8 +39,12 @@
                         BackgroundColor="{StaticResource Gray900}"
                         Padding="15"
                         StrokeShape="RoundRectangle 16"
-                        HeightRequest="250">
-                    <microcharts:ChartView Chart="{Binding ExpensesChart}" />
+                        HeightRequest="100">
+                    <!-- <microcharts:ChartView Chart="{Binding ExpensesChart}" /> -->
+                    <Label Text="Gráfico temporariamente desativado por restrição de hardware (Android 16 / 16KB)." 
+                           TextColor="{StaticResource Gray200}" 
+                           HorizontalTextAlignment="Center" 
+                           VerticalTextAlignment="Center" />
                 </Border>
 
                 <!-- Transações Recentes -->
