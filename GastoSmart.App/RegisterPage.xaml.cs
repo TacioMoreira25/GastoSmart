@@ -1,8 +1,11 @@
 using GastoSmart.App.Services;
+using Microsoft.Maui.ApplicationModel;
 using System.Text.RegularExpressions;
+using System;
+
 namespace GastoSmart.App;
 
-public partial class RegisterPage 
+public partial class RegisterPage : ContentPage
 {
     private readonly AuthService _authService;
 
@@ -14,10 +17,10 @@ public partial class RegisterPage
 
     private async void OnRegisterClicked(object? sender, EventArgs e)
     {
-        var name = NameEntry.Text.Trim();
-        var email = EmailEntry.Text.Trim();
-        var password = PasswordEntry.Text;
-        var confirmPassword = ConfirmPasswordEntry.Text;
+        var name = NameEntry.Text?.Trim() ?? string.Empty;
+        var email = EmailEntry.Text?.Trim() ?? string.Empty;
+        var password = PasswordEntry.Text ?? string.Empty;
+        var confirmPassword = ConfirmPasswordEntry.Text ?? string.Empty;
 
         if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || 
             string.IsNullOrEmpty(confirmPassword))
@@ -58,7 +61,10 @@ public partial class RegisterPage
         if (result.IsSuccess)
         {
             await DisplayAlertAsync("Sucesso", "Conta criada com sucesso! Faça login.", "OK");
-            Application.Current!.Windows[0].Page = new LoginPage(_authService);
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                Application.Current!.Windows[0].Page = new LoginPage(_authService);
+            });
         }
         else
         {
@@ -68,6 +74,9 @@ public partial class RegisterPage
 
     private void OnBackToLoginClicked(object? sender, EventArgs e)
     {
-        Application.Current!.Windows[0].Page = new LoginPage(_authService);
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            Application.Current!.Windows[0].Page = new LoginPage(_authService);
+        });
     }
 }

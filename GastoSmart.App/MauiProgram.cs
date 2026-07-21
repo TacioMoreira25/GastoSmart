@@ -1,6 +1,7 @@
 using GastoSmart.App;
 using Microsoft.Extensions.Logging;
 using GastoSmart.App.Services;
+using Microsoft.Extensions.Hosting;
 // using Microcharts.Maui;
 
 namespace Gastosmart.App;
@@ -10,6 +11,8 @@ public static class MauiProgram
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();
+
+        builder.AddServiceDefaults();
 
         builder.UseMauiApp<App>()
             // .UseMicrocharts()
@@ -34,15 +37,19 @@ public static class MauiProgram
         {
             var factory = sp.GetRequiredService<IHttpClientFactory>();
             var client = factory.CreateClient("GastoSmartClient");
-            return new ApiService(client);
+            var safeStorage = sp.GetRequiredService<ISafeStorageService>();
+            return new ApiService(client, safeStorage);
         });
         
         builder.Services.AddTransient<AuthService>(sp => 
         {
             var factory = sp.GetRequiredService<IHttpClientFactory>();
             var client = factory.CreateClient();
-            return new AuthService(client);
+            var safeStorage = sp.GetRequiredService<ISafeStorageService>();
+            return new AuthService(client, safeStorage);
         });
+
+        builder.Services.AddSingleton<ISafeStorageService, SafeStorageService>();
 
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<LoginPage>();
@@ -51,6 +58,8 @@ public static class MauiProgram
         builder.Services.AddTransient<GastoSmart.App.ViewModels.DashboardViewModel>();
         builder.Services.AddTransient<DashboardPage>();
         builder.Services.AddTransient<SaveTransactionPage>();
+        builder.Services.AddTransient<GastoSmart.App.ViewModels.NovaTransacaoViewModel>();
+        builder.Services.AddTransient<NovaTransacaoPage>();
 
         return builder.Build();
     }

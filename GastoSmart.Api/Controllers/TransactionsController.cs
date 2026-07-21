@@ -29,7 +29,7 @@ public class TransactionsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TransactionResponseDTO>>> GetTransactions()
     {
-        var supabaseId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+        var supabaseId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
     
         if (string.IsNullOrEmpty(supabaseId))
         {
@@ -86,7 +86,7 @@ public class TransactionsController : ControllerBase
     [HttpGet("dashboard-summary")]
     public async Task<ActionResult<DashboardSummaryDTO>> GetDashboardSummary()
     {
-        var supabaseId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+        var supabaseId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
         if (string.IsNullOrEmpty(supabaseId))
             return Unauthorized("Utilizador não autenticado.");
 
@@ -140,7 +140,7 @@ public class TransactionsController : ControllerBase
     public async Task<ActionResult<TransactionResponseDTO>> CreateTransaction(TransactionRequestDTO request,
         [FromHeader(Name = "X-Idempotency-Key")] Guid idempotencyKey)
     {
-        var supabaseId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+        var supabaseId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
         
         if (string.IsNullOrEmpty(supabaseId))
         {

@@ -22,12 +22,12 @@
                     <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="*, *">
                         <VerticalStackLayout Grid.Row="0" Grid.Column="0">
                             <Label Text="Saldo Total" TextColor="{StaticResource Gray200}" FontSize="14" />
-                            <Label Text="{Binding TotalBalance, StringFormat='{0:C}'}" TextColor="White" FontSize="28" FontAttributes="Bold" />
+                            <Label Text="{Binding SaldoTotal, StringFormat='{0:C}'}" TextColor="White" FontSize="28" FontAttributes="Bold" />
                         </VerticalStackLayout>
                         
                         <VerticalStackLayout Grid.Row="0" Grid.Column="1" HorizontalOptions="End">
                             <Label Text="Gastos do Mês" TextColor="{StaticResource Gray200}" FontSize="14" HorizontalOptions="End" />
-                            <Label Text="{Binding MonthlyExpenses, StringFormat='{0:C}'}" TextColor="#FF6B6B" FontSize="18" FontAttributes="Bold" HorizontalOptions="End" />
+                            <Label Text="{Binding GastosMes, StringFormat='{0:C}'}" TextColor="#FF6B6B" FontSize="18" FontAttributes="Bold" HorizontalOptions="End" />
                         </VerticalStackLayout>
                     </Grid>
                 </Border>
@@ -40,19 +40,24 @@
                         Padding="15"
                         StrokeShape="RoundRectangle 16"
                         HeightRequest="100">
-                    <!-- <microcharts:ChartView Chart="{Binding ExpensesChart}" /> -->
-                    <Label Text="Gráfico temporariamente desativado por restrição de hardware (Android 16 / 16KB)." 
-                           TextColor="{StaticResource Gray200}" 
-                           HorizontalTextAlignment="Center" 
-                           VerticalTextAlignment="Center" />
+                    <Grid ColumnDefinitions="*,*" VerticalOptions="Center">
+                        <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center">
+                            <BoxView Color="#FF6B6B" HeightRequest="8" WidthRequest="40" CornerRadius="4" Margin="0,0,0,5"/>
+                            <Label Text="Despesas" TextColor="{StaticResource Gray200}" FontSize="12" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center">
+                            <BoxView Color="#4CAF50" HeightRequest="8" WidthRequest="40" CornerRadius="4" Margin="0,0,0,5"/>
+                            <Label Text="Receitas" TextColor="{StaticResource Gray200}" FontSize="12" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Grid>
                 </Border>
 
                 <!-- Transações Recentes -->
                 <Label Text="Transações Recentes" TextColor="White" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0" />
                 
-                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{StaticResource Primary}" />
+                <ActivityIndicator HorizontalOptions="Center" IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{StaticResource Primary}" />
 
-                <CollectionView ItemsSource="{Binding RecentTransactions}">
+                <CollectionView ItemsSource="{Binding TransacoesRecentes}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <Border Stroke="{StaticResource Gray900}"
@@ -62,14 +67,22 @@
                                     Margin="0,0,0,10"
                                     StrokeShape="RoundRectangle 12">
                                 <Grid ColumnDefinitions="*, Auto">
-                                    <VerticalStackLayout Grid.Column="0">
-                                        <Label Text="{Binding Title}" TextColor="White" FontSize="16" FontAttributes="Bold" />
-                                        <Label Text="{Binding CategoryName}" TextColor="{StaticResource Gray200}" FontSize="12" />
+                                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                        <Label Text="{Binding Descricao}" TextColor="White" FontSize="16" FontAttributes="Bold" />
+                                        <Label Text="{Binding Data, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource Gray200}" FontSize="12" />
                                     </VerticalStackLayout>
                                     
-                                    <VerticalStackLayout Grid.Column="1" HorizontalOptions="End">
-                                        <Label Text="{Binding Amount, StringFormat='{0:C}'}" TextColor="White" FontSize="16" FontAttributes="Bold" HorizontalOptions="End" />
-                                        <Label Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource Gray200}" FontSize="12" HorizontalOptions="End" />
+                                    <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" VerticalOptions="Center">
+                                        <Label Text="{Binding Valor, StringFormat='{0:C}'}" FontSize="16" FontAttributes="Bold" HorizontalOptions="End">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding Tipo}" Value="Despesa">
+                                                    <Setter Property="TextColor" Value="#FF6B6B" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Label" Binding="{Binding Tipo}" Value="Receita">
+                                                    <Setter Property="TextColor" Value="#4CAF50" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
                                     </VerticalStackLayout>
                                 </Grid>
                             </Border>
@@ -83,14 +96,18 @@
         </ScrollView>
 
         <!-- Floating Action Button (FAB) -->
-        <ImageButton 
-            Source="camera_icon.png"
-            Command="{Binding ScanReceiptAsyncCommand}"
+        <Button 
+            Text="+"
+            FontSize="32"
+            FontAttributes="Bold"
+            TextColor="White"
+            Command="{Binding NovaTransacaoCommand}"
             BackgroundColor="{StaticResource Primary}"
             CornerRadius="30"
             WidthRequest="60"
             HeightRequest="60"
             Margin="20"
+            Padding="0"
             HorizontalOptions="End"
             VerticalOptions="End"
             Shadow="{Shadow Brush=Black, Offset='0,4', Opacity=0.3, Radius=8}" />

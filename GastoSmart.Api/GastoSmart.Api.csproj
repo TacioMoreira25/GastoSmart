@@ -20,6 +20,7 @@
     <ProjectReference Include="..\GastoSmart.Infrastructure\GastoSmart.Infrastructure.csproj" />
     <ProjectReference Include="..\GastoSmart.Domain\GastoSmart.Domain.csproj" />
     <ProjectReference Include="..\GastoSmart.Application\GastoSmart.Application.csproj" />
+    <ProjectReference Include="..\GastoSmart.ServiceDefaults\GastoSmart.ServiceDefaults.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -5,4 +5,5 @@
   <Project Path="GastoSmart.App/GastoSmart.App.csproj" />
   <Project Path="GastoSmart.Domain/GastoSmart.Domain.csproj" />
   <Project Path="GastoSmart.Infrastructure/GastoSmart.Infrastructure.csproj" />
+  <Project Path="GastoSmart.ServiceDefaults/GastoSmart.ServiceDefaults.csproj" />
 </Solution>

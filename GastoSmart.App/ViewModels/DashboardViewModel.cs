@@ -3,70 +3,91 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Gastosmart.App.DTOs;
 using GastoSmart.App.Services;
-// using Microcharts;
-// using SkiaSharp;
+
+using System.Text.Json.Serialization;
 
 namespace GastoSmart.App.ViewModels;
+
+public class Transacao
+{
+    [JsonPropertyName("title")]
+    public string Descricao { get; set; } = string.Empty;
+    
+    [JsonPropertyName("amount")]
+    public decimal Valor { get; set; }
+    
+    [JsonPropertyName("date")]
+    public DateTime Data { get; set; }
+    
+    [JsonPropertyName("categoryName")]
+    public string Tipo { get; set; } = string.Empty;
+}
 
 public partial class DashboardViewModel : ObservableObject
 {
     private readonly ApiService _apiService;
 
     [ObservableProperty]
-    public partial decimal TotalBalance { get; set; }
+    public partial decimal SaldoTotal { get; set; }
 
     [ObservableProperty]
-    public partial decimal MonthlyExpenses { get; set; }
+    public partial decimal GastosMes { get; set; }
 
     [ObservableProperty]
     public partial bool IsBusy { get; set; }
 
-    // [ObservableProperty]
-    // public partial Chart? ExpensesChart { get; set; }
-    public ObservableCollection<TransactionResponseDTO> RecentTransactions { get; } = new();
+    public ObservableCollection<Transacao> TransacoesRecentes { get; } = new();
 
-    public DashboardViewModel(ApiService apiService, decimal monthlyExpenses)
+    public DashboardViewModel(ApiService apiService)
     {
         _apiService = apiService;
-        MonthlyExpenses = monthlyExpenses;
     }
 
-    [RelayCommand]
-    public async Task LoadDashboardDataAsync()
+    public async Task CarregarDadosAsync()
     {
-        if (IsBusy) return;
-
         IsBusy = true;
-
         try
         {
-            var summary = await _apiService.GetDashboardSummaryAsync();
-            if (summary != null)
+            var transacoes = await _apiService.GetTransacoesAsync();
+            TransacoesRecentes.Clear();
+            
+            decimal saldo = 0;
+            decimal gastosMes = 0;
+            var mesAtual = DateTime.Now.Month;
+            var anoAtual = DateTime.Now.Year;
+
+            if (transacoes != null)
             {
-                TotalBalance = summary.TotalBalance;
-                MonthlyExpenses = summary.MonthlyExpenses;
-
-                RecentTransactions.Clear();
-                foreach (var tx in summary.RecentTransactions)
+                foreach (var t in transacoes)
                 {
-                    RecentTransactions.Add(tx);
+                    TransacoesRecentes.Add(t);
+                    
+                    if (t.Tipo?.Equals("Receita", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        saldo += t.Valor;
+                    }
+                    else
+                    {
+                        saldo -= t.Valor;
+                        
+                        if (t.Data.Month == mesAtual && t.Data.Year == anoAtual)
+                        {
+                            gastosMes += t.Valor;
+                        }
+                    }
                 }
-
-                // UpdateChart(summary.CategorySummaries);
             }
-        }
-        catch (UnauthorizedAccessException)
-        {
-            await Shell.Current.GoToAsync("//LoginPage");
+
+            SaldoTotal = saldo;
+            GastosMes = gastosMes;
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[CRASH EVITADO NO DASHBOARD]: {ex.Message}\n{ex.StackTrace}");
-        
-            MainThread.BeginInvokeOnMainThread(async void () =>
+            System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] Erro ao carregar dados: {ex.Message}");
+            if (Application.Current?.Windows.Count > 0 && Application.Current.Windows[0].Page != null)
             {
-                await Application.Current?.Windows[0].Page?.DisplayAlertAsync("Erro ao Carregar", "Ocorreu um erro ao montar o painel.", "OK")!;
-            });
+                await Application.Current.Windows[0].Page!.DisplayAlertAsync("Erro de Conexão", $"Não foi possível carregar os dados do painel: {ex.Message}", "OK");
+            }
         }
         finally
         {
@@ -74,34 +95,11 @@ public partial class DashboardViewModel : ObservableObject
         }
     }
 
-    /*
-    private void UpdateChart(List<CategorySummaryDTO> categories)
+    [RelayCommand]
+    public async Task NovaTransacao()
     {
-        var entries = new List<ChartEntry>();
-        var colors = new[] { "#FF6B6B", "#4ECDC4", "#45B7D1", "#F9D56E", "#FF8C42", "#8B8BC3" };
-        int colorIndex = 0;
-
-        foreach (var category in categories)
-        {
-            entries.Add(new ChartEntry((float)category.TotalAmount)
-            {
-                Label = category.CategoryName,
-                ValueLabel = category.TotalAmount.ToString("C"),
-                Color = SKColor.Parse(colors[colorIndex % colors.Length])
-            });
-            colorIndex++;
-        }
-
-        ExpensesChart = new DonutChart
-        {
-            Entries = entries,
-            LabelTextSize = 30,
-            BackgroundColor = SKColors.Transparent,
-            HoleRadius = 0.5f,
-            LabelMode = LabelMode.RightOnly
-        };
+        await Shell.Current.GoToAsync("NovaTransacaoPage");
     }
-    */
 
     [RelayCommand]
     public async Task ScanReceiptAsync()

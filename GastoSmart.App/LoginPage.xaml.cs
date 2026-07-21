@@ -1,9 +1,11 @@
 using Gastosmart.App;
 using GastoSmart.App.Services;
+using Microsoft.Maui.ApplicationModel;
+using System;
 
 namespace GastoSmart.App;
 
-public partial class LoginPage
+public partial class LoginPage : ContentPage
 {
     private readonly AuthService _authService;
 
@@ -15,8 +17,8 @@ public partial class LoginPage
 
     private async void OnLoginClicked(object? sender, EventArgs e)
     {
-        var email = EmailEntry.Text.Trim();
-        var password = PasswordEntry.Text;
+        var email = EmailEntry.Text?.Trim() ?? string.Empty;
+        var password = PasswordEntry.Text ?? string.Empty;
 
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
         {
@@ -36,9 +38,9 @@ public partial class LoginPage
             {
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                 
-                    Application.Current?.Windows[0].Page = new AppShell(); 
-                });            }
+                    Application.Current!.Windows[0].Page = new AppShell();
+                });
+            }
             else
             {
                 await DisplayAlertAsync("Erro", "E-mail ou senha incorretos.", "OK");
@@ -51,7 +53,6 @@ public partial class LoginPage
         }
         finally
         {
-            // Restaura o botão
             LoadingIndicator.IsRunning = false;
             LoadingIndicator.IsVisible = false;
             LoginButton.IsVisible = true;
@@ -60,6 +61,9 @@ public partial class LoginPage
 
     private void OnGoToRegisterClicked(object? sender, EventArgs e)
     {
-        Application.Current!.Windows[0].Page = new RegisterPage(_authService);
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            Application.Current!.Windows[0].Page = new RegisterPage(_authService);
+        });
     }
 }
