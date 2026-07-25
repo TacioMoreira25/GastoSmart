@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:GastoSmart.ViewModels"
+             xmlns:models="clr-namespace:GastoSmart.Models"
+             x:Class="GastoSmart.Views.PerfilSelectionPage"
+             x:DataType="viewmodels:PerfilSelectionViewModel"
+             Title="Selecionar Perfil">
+
+    <Grid RowDefinitions="Auto, *, Auto" Padding="20">
+        
+        <Label Text="Bem-vindo ao GastoSmart"
+               FontSize="24"
+               FontAttributes="Bold"
+               HorizontalOptions="Center"
+               Margin="0,20,0,20" />
+
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding Perfis}"
+                        SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:PerfilUsuario">
+                    <Border Margin="0,5" Padding="15" StrokeShape="RoundRectangle 10" BackgroundColor="{Binding Cor}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer 
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:PerfilSelectionViewModel}}, Path=SelecionarPerfilCommand}"
+                                CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+                        <Label Text="{Binding Nome}" TextColor="White" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" />
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <Label Text="Nenhum perfil encontrado. Crie um novo!"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </CollectionView.EmptyView>
+        </CollectionView>
+
+        <Button Grid.Row="2"
+                Text="Criar Novo Perfil"
+                Command="{Binding CriarPerfilCommand}"
+                Margin="0,20,0,0" />
+
+    </Grid>
+
+</ContentPage>

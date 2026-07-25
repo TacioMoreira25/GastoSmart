@@ -1,9 +1,3 @@
 <Solution>
-  <Project Path="GastoSmart.Api/GastoSmart.Api.csproj" />
-  <Project Path="GastoSmart.AppHost/GastoSmart.AppHost.csproj" />
-  <Project Path="GastoSmart.Application/GastoSmart.Application.csproj" />
-  <Project Path="GastoSmart.App/GastoSmart.App.csproj" />
-  <Project Path="GastoSmart.Domain/GastoSmart.Domain.csproj" />
-  <Project Path="GastoSmart.Infrastructure/GastoSmart.Infrastructure.csproj" />
-  <Project Path="GastoSmart.ServiceDefaults/GastoSmart.ServiceDefaults.csproj" />
+  <Project Path="GastoSmart.csproj" />
 </Solution>

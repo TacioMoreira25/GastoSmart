@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:GastoSmart.ViewModels"
+             xmlns:models="clr-namespace:GastoSmart.Models"
+             x:Class="GastoSmart.Views.DashboardPage"
+             x:DataType="viewmodels:DashboardViewModel"
+             Title="Dashboard"
+             BackgroundColor="{StaticResource Gray950}">
+
+    <!-- Dark Theme Colors Expected from Styles: Gray950, Gray900, Gray200, Primary etc -->
+    
+    <Grid>
+        <!-- Main Content -->
+        <ScrollView>
+            <VerticalStackLayout Spacing="20" Padding="20">
+                
+                <!-- Resumo Header -->
+                <Border Stroke="{StaticResource Gray900}" 
+                        StrokeThickness="1"
+                        BackgroundColor="{StaticResource Gray900}"
+                        Padding="20"
+                        StrokeShape="RoundRectangle 16">
+                    <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="*, *">
+                        <VerticalStackLayout Grid.Row="0" Grid.Column="0">
+                            <Label Text="Saldo Total" TextColor="{StaticResource Gray200}" FontSize="14" />
+                            <Label Text="{Binding SaldoTotal, StringFormat='{0:C}'}" TextColor="White" FontSize="28" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                        
+                        <VerticalStackLayout Grid.Row="0" Grid.Column="1" HorizontalOptions="End">
+                            <Label Text="Gastos do Mês" TextColor="{StaticResource Gray200}" FontSize="14" HorizontalOptions="End" />
+                            <Label Text="{Binding GastosMes, StringFormat='{0:C}'}" TextColor="#FF6B6B" FontSize="18" FontAttributes="Bold" HorizontalOptions="End" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- Gráfico de Categorias -->
+                <Label Text="Gastos por Categoria" TextColor="White" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0" />
+                <Border Stroke="{StaticResource Gray900}" 
+                        StrokeThickness="1"
+                        BackgroundColor="{StaticResource Gray900}"
+                        Padding="15"
+                        StrokeShape="RoundRectangle 16"
+                        HeightRequest="100">
+                    <Grid ColumnDefinitions="*,*" VerticalOptions="Center">
+                        <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center">
+                            <BoxView Color="#FF6B6B" HeightRequest="8" WidthRequest="40" CornerRadius="4" Margin="0,0,0,5"/>
+                            <Label Text="Despesas" TextColor="{StaticResource Gray200}" FontSize="12" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center">
+                            <BoxView Color="#4CAF50" HeightRequest="8" WidthRequest="40" CornerRadius="4" Margin="0,0,0,5"/>
+                            <Label Text="Receitas" TextColor="{StaticResource Gray200}" FontSize="12" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- Transações Recentes -->
+                <Label Text="Transações Recentes" TextColor="White" FontSize="18" FontAttributes="Bold" Margin="0,10,0,0" />
+                
+                <ActivityIndicator HorizontalOptions="Center" IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{StaticResource Primary}" />
+
+                <CollectionView ItemsSource="{Binding TransacoesRecentes}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Transacao">
+                            <Border Stroke="{StaticResource Gray900}"
+                                    StrokeThickness="1"
+                                    BackgroundColor="{StaticResource Gray900}"
+                                    Padding="15"
+                                    Margin="0,0,0,10"
+                                    StrokeShape="RoundRectangle 12">
+                                <Grid ColumnDefinitions="*, Auto">
+                                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                        <Label Text="{Binding Descricao}" TextColor="White" FontSize="16" FontAttributes="Bold" />
+                                        <Label Text="{Binding Data, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource Gray200}" FontSize="12" />
+                                    </VerticalStackLayout>
+                                    
+                                    <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" VerticalOptions="Center">
+                                        <Label Text="{Binding Valor, StringFormat='{0:C}'}" FontSize="16" FontAttributes="Bold" HorizontalOptions="End">
+                                            <!-- Simple way to color if valor is negative or positive could use a converter, but we'll leave it simple for now -->
+                                        </Label>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Padding extra para o FAB não cobrir as transações -->
+                <BoxView HeightRequest="80" Color="Transparent" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Floating Action Button (FAB) -->
+        <Button 
+            Text="+"
+            FontSize="32"
+            FontAttributes="Bold"
+            TextColor="White"
+            Command="{Binding NovaTransacaoCommand}"
+            BackgroundColor="{StaticResource Primary}"
+            CornerRadius="30"
+            WidthRequest="60"
+            HeightRequest="60"
+            Margin="20"
+            Padding="0"
+            HorizontalOptions="End"
+            VerticalOptions="End"
+            Shadow="{Shadow Brush=Black, Offset='0,4', Opacity=0.3, Radius=8}" />
+    </Grid>
+
+</ContentPage>

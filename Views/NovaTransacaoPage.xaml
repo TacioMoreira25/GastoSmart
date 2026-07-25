@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:GastoSmart.ViewModels"
+             x:Class="GastoSmart.Views.NovaTransacaoPage"
+             x:DataType="viewmodels:NovaTransacaoViewModel"
+             Title="Nova Transação"
+             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}">
+    <ContentPage.Content>
+        <ScrollView>
+            <VerticalStackLayout Spacing="20" Padding="20">
+                <Label Text="Nova Transação" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,0,0,20"/>
+                
+                <Button Text="📸 Escanear Recibo com IA (Groq)" 
+                        Command="{Binding ScanReceiptCommand}" 
+                        BackgroundColor="#6C5CE7" 
+                        TextColor="White" 
+                        FontAttributes="Bold" />
+                
+                <VerticalStackLayout IsVisible="{Binding IsBusy}" HorizontalOptions="Center" Spacing="10">
+                    <ActivityIndicator IsRunning="{Binding IsBusy}" Color="{StaticResource Primary}" HorizontalOptions="Center" />
+                    <Label Text="Processando..." TextColor="{StaticResource Gray200}" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <Label Text="Descrição" FontAttributes="Bold" />
+                <Entry Text="{Binding Descricao}" Placeholder="Ex: Mercado" />
+
+                <Label Text="Valor" FontAttributes="Bold" />
+                <Entry Text="{Binding Valor}" Placeholder="0.00" Keyboard="Numeric" />
+
+                <Label Text="Data" FontAttributes="Bold" />
+                <DatePicker Date="{Binding Data}" />
+
+                <Label Text="Categoria" FontAttributes="Bold" />
+                <Picker SelectedItem="{Binding Categoria}" Title="Selecione a categoria">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>Alimentação</x:String>
+                            <x:String>Transporte</x:String>
+                            <x:String>Saúde</x:String>
+                            <x:String>Educação</x:String>
+                            <x:String>Lazer</x:String>
+                            <x:String>Outros</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
+
+                <HorizontalStackLayout Spacing="20" HorizontalOptions="Center" Margin="0,30,0,0">
+                    <!-- For simplicity, Cancelar just pops the page using Shell routing logic, though a Command could be bound -->
+                    <Button Text="Salvar" Command="{Binding SalvarTransacaoCommand}" BackgroundColor="{StaticResource Primary}" WidthRequest="260" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>
